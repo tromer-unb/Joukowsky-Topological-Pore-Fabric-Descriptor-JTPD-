@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use JTPD, please cite the associated manuscript when available and record the exact software version or commit."
+title: "Joukowsky–Topological Pore-Fabric Descriptor (JTPD)"
+type: software
+version: 0.1.0
+date-released: 2026-10-02
+authors:
+  - name: "tromer-unb"
+repository-code: "https://github.com/tromer-unb/Joukowsky-Topological-Pore-Fabric-Descriptor-JTPD-"
+license: MIT
