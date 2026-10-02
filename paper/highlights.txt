@@ -1,0 +1,6 @@
+Highlights
+• JTPD separates pore abundance, topology, spanning and boundary geometry.
+• Dual-connectivity Betti numbers are validated on synthetic 2-D masks.
+• Joukowsky contour responses are invariant to similarity transforms.
+• Spanning is scale-stable while Betti densities resolve finer structure.
+• The framework is designed for calibrated 2-D rock-section comparison.
