@@ -1,0 +1,260 @@
+\documentclass[preprint,12pt,authoryear]{elsarticle}
+
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{siunitx}
+\usepackage{hyperref}
+\usepackage{lineno}
+\hypersetup{colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue}
+\graphicspath{{figures/}}
+\emergencystretch=2em
+\journal{Journal of Structural Geology}
+
+\begin{document}
+\begin{frontmatter}
+\title{Beyond pore fraction: a scale-aware topology--Joukowsky descriptor for two-dimensional rock-section fabrics}
+
+\author[aff1]{[Author names]\corref{cor1}}
+\cortext[cor1]{Corresponding author}
+\ead{[corresponding author e-mail]}
+\address[aff1]{[Affiliation(s) to be confirmed]}
+
+\begin{abstract}
+Quantitative rock-section analysis often reduces microstructure to phase fraction, size, or a small set of shape factors, although structurally distinct pore fabrics can share similar scalar statistics. We introduce the Joukowsky--Topological Pore-Fabric Descriptor (JTPD), an interpretable two-dimensional representation that explicitly separates pore abundance, connectivity, topology, directional spanning, interface density, anisotropy, and nonlinear contour response. The nonlinear term treats each pore boundary as a complex-plane contour and probes its response to the Joukowsky map, while orientation averaging makes the resulting area and perimeter ratios insensitive to translation, scale, rotation, reflection, traversal direction, and starting vertex. The topology is computed with dual digital connectivity, and all count-based quantities are reported together with the observation scale. We demonstrate the framework on three \SI{1.802}{mm} square fields extracted from a calibrated rock-section mosaic. At an effective pixel size of \SI{7.04}{\micro m}, the pore-area fraction decreases from 0.907 to 0.465 across the fields, whereas loop density decreases from 78.5 to \SI{24.3}{mm^{-2}}. One field loses horizontal spanning while retaining vertical spanning, a distinction not encoded by pore fraction. Synthetic tests recover prescribed Betti numbers exactly, and the Joukowsky response is invariant to rigid and similarity transforms to a maximum relative numerical error below $9\times10^{-13}$. Across effective pixel sizes of 14.08--\SI{1.76}{\micro m}, directional spanning is preserved while Betti densities evolve strongly, showing that scale dependence is informative rather than incidental. JTPD is therefore proposed as a compact measurement operator for comparing segmented pore fabrics, not as a surrogate for three-dimensional transport. Its principal value is to expose, in a single reproducible vector, which structural information comes from amount, topology, directionality, and boundary geometry.
+\end{abstract}
+
+\begin{keyword}
+rock thin section \sep digital rock \sep pore topology \sep Betti numbers \sep Joukowsky transform \sep structural fabric \sep image descriptor
+\end{keyword}
+\end{frontmatter}
+
+\linenumbers
+
+\section{Introduction}
+
+Thin-section and other two-dimensional rock images are among the most accessible records of geological microstructure. They can preserve grain boundaries, fractures, pores, veins, and directional fabrics at spatial resolutions for which volumetric imaging is either unavailable or impractical. Quantitative structural geology has therefore long relied on image-derived measurements of grain size, shape and boundary organization \citep{Heilbronner2000}, while automated rock-section analysis increasingly provides reproducible grain and pore segmentation \citep{Zhang2020}. The difficulty begins after segmentation: a binary image still contains far more structural information than can be represented by a phase fraction or a mean pore size.
+
+For porous geomaterials, connectivity and topology are central because transport-relevant architecture is controlled not only by how much pore space exists, but by how it is organized \citep{Blunt2013}. This distinction is already fundamental in structural geology: two-dimensional fracture-network studies show that intensity, geometry, topology and percolation are related but non-equivalent descriptions of connectivity \citep{SandersonNixon2015,SandersonNixon2018}. Classical image analysis captures component size, interface length, aspect ratio and related morphology, whereas topological approaches quantify connected components, loops and their persistence across scales \citep{Robins2016,Bizhani2021,Liu2026}. Persistent homology is particularly powerful because it records the birth and death of features under a filtration, but this power comes with a larger mathematical and computational object than is always needed for routine comparison. At the other end of the spectrum, Euler characteristic is compact and interpretable, but collapses different topological states into one number \citep{Smith2021}. A useful descriptor for structural image analysis should therefore retain the auditability of simple measurements while keeping abundance, topology, directionality and boundary shape as distinguishable information channels.
+
+A second difficulty is scale. Betti numbers, pore counts and interface length depend on image resolution and segmentation. This dependence is sometimes treated as a nuisance, yet in geological microstructures it is itself a statement about the hierarchy of resolved features. Image-reduction studies have explicitly shown that pore topology changes with resolution \citep{Prokhorov2021}. Consequently, a descriptor that reports topological counts without its observation scale is incomplete.
+
+Here we develop the Joukowsky--Topological Pore-Fabric Descriptor (JTPD). The method is deliberately compact. It combines physically calibrated phase and interface measures with dual-connectivity topology, directional spanning, component anisotropy and a nonlinear contour probe based on the classical Joukowsky mapping \citep{Repp1974}. The mapping is not interpreted as a flow solution or constitutive law. Instead, it is used as a controlled analytic perturbation of boundary geometry: the response of area and perimeter to the transform provides an additional, dimensionless description of shape. Our objectives are to (1) define a reproducible descriptor whose components retain clear structural meaning, (2) remove avoidable coordinate-system dependence from the Joukowsky response, (3) verify the digital topology on synthetic masks, and (4) quantify how the descriptor behaves with observation scale.
+
+The demonstration uses only three fields from one calibrated rock-section mosaic and is therefore methodological rather than lithological. We do not infer three-dimensional connectivity or permeability from a two-dimensional section. The central claim is narrower and testable: JTPD separates abundance, topology, directional connectivity and contour geometry in a way that a scalar pore-area fraction cannot.
+
+\section{Materials and methods}
+
+\subsection{Rock-section fields and physical calibration}
+
+Three segmented fields, R1--R3, were extracted from the same parent image (\texttt{Lam\_065.czi}). Each source mask contains $4096\times4096$ pixels. Metadata associated with the acquisition specify a source pixel size of \SI{0.44}{\micro m} in both directions, giving a field width of \SI{1.80224}{mm} and area of \SI{3.24807}{mm^2}. The green segmented phase is interpreted as solid and the black phase as pore. Segmentation was read deterministically using $G>R+20$ and $G>B+20$.
+
+The principal analysis was performed after block averaging to $256\times256$ pixels and thresholding at 0.5. This corresponds to an effective pixel size
+\begin{equation}
+\ell = 16\times 0.44 = \SI{7.04}{\micro m}.
+\end{equation}
+To quantify scale sensitivity, the same workflow was repeated at 128, 256, 512 and 1024 pixels per side, corresponding to effective pixel sizes of 14.08, 7.04, 3.52 and \SI{1.76}{\micro m}. We use the term 2-D pore-area fraction rather than porosity because a single section does not determine the three-dimensional pore-volume fraction.
+
+\subsection{Descriptor architecture}
+
+At observation scale $\ell$, JTPD is represented as
+\begin{equation}
+\mathbf{D}_{JT}(\ell,\alpha)=
+\left[
+\phi_p,\,
+\rho_{\beta_0},\,
+\rho_{\beta_1},\,
+\rho_{\chi},\,
+f_{\mathrm{LCC}},\,
+s_x,s_y,\,
+\lambda_I,\,
+\widetilde{\mathcal A},\,
+\widetilde{J_A}(\alpha),\,
+\widetilde{J_L}(\alpha)
+\right],
+\label{eq:descriptor}
+\end{equation}
+where $\phi_p$ is 2-D pore-area fraction; $\rho_{\beta_0}$, $\rho_{\beta_1}$ and $\rho_\chi$ are component, loop and Euler-characteristic densities per physical image area; $f_{\mathrm{LCC}}$ is the fraction of pore pixels in the largest connected component; $s_x$ and $s_y$ are directional spanning flags; $\lambda_I$ is solid--pore interface length per unit image area; $\widetilde{\mathcal A}$ summarizes component anisotropy; and $\widetilde{J_A}$ and $\widetilde{J_L}$ summarize the Joukowsky area and perimeter responses. Tildes denote robust component summaries, here medians.
+
+The purpose of Eq.~\ref{eq:descriptor} is decomposition rather than indiscriminate feature accumulation. Phase amount, topological redundancy, directional connectivity and boundary shape remain separately inspectable.
+
+\subsection{Digital topology and directional spanning}
+
+Pore components are labelled using 8-neighbour foreground connectivity. To avoid the standard digital-topology ambiguity, holes are counted using the dual 4-neighbour connectivity in the complementary solid phase. Thus,
+\begin{equation}
+\beta_0=N_{\mathrm{pore},8},
+\end{equation}
+and $\beta_1$ is the number of 4-connected complementary components that do \emph{not} intersect the image border. The planar Euler characteristic is
+\begin{equation}
+\chi=\beta_0-\beta_1.
+\end{equation}
+We report $\beta_0/A$, $\beta_1/A$ and $\chi/A$ because the three fields have a known physical area and because count densities are easier to compare across equally calibrated fields.
+
+Directional spanning is evaluated independently. A pore component spans in $x$ if it intersects the left and right borders, and in $y$ if it intersects the top and bottom borders. These are planar spanning criteria only.
+
+The solid--pore interface is estimated from horizontal and vertical phase transitions on the grid and converted to physical length. It is reported as interface length per image area. More sophisticated subpixel estimators could be substituted without changing the descriptor architecture.
+
+\subsection{Contour-preserving Joukowsky response}
+
+For each pore component larger than \SI{800}{\micro m^2}, the outer boundary is extracted from the raster by a marching-squares contour and resampled to 128 points at uniform arc length. This replaces the convex-hull approximation used in the initial prototype and preserves concavity at the observation scale.
+
+Let the ordered contour be $z_k=x_k+i y_k$. After centring, define the mean radial scale
+\begin{equation}
+r=\frac{1}{N}\sum_k |z_k|,
+\qquad
+u_k=\frac{z_k}{r}.
+\end{equation}
+The dimensioned Joukowsky perturbation is
+\begin{equation}
+w_k=r\left(u_k+\frac{\alpha^2}{u_k}\right),
+\label{eq:jouk}
+\end{equation}
+where $\alpha\ge0$ controls the perturbation strength. At $\alpha=0$, Eq.~\ref{eq:jouk} reduces to a rigidly rotated copy of the original centred contour.
+
+Because the Joukowsky map depends on the complex-plane orientation, a raw application would make the descriptor depend on the arbitrary image axes. We therefore align each contour edge with the real axis in turn, apply Eq.~\ref{eq:jouk}, compute transformed area and perimeter, and average the measurements over all edge alignments. The dimensionless responses are
+\begin{equation}
+J_A(\alpha)=\frac{\langle A_J(\alpha)\rangle}{A},
+\qquad
+J_L(\alpha)=\frac{\langle L_J(\alpha)\rangle}{L}.
+\end{equation}
+Consequently $J_A(0)=J_L(0)=1$ by construction. We evaluate $\alpha=0$--0.35 and use $\alpha=0.25$ as a compact reference value. The response curve, rather than a single arbitrarily chosen value, is retained in the reproducible output.
+
+\subsection{Validation and reproducibility}
+
+Two validation layers were used. First, the topology implementation was tested on synthetic masks with known states: a disk $(\beta_0,\beta_1)=(1,0)$, an annulus $(1,1)$, two disjoint disks $(2,0)$, and a horizontal channel $(1,0)$ that spans only in $x$. Second, the dimensionless Joukowsky responses were recomputed after translation, uniform scaling, rotation, reflection and reversed contour traversal.
+
+All calculations and figures are generated by \texttt{jtpd\_analysis.py}. Numerical outputs are stored in \path{results/jtpd_summary.csv}, \path{results/scale_sensitivity.csv} and \path{results/jtpd_results.json}. The analysis operates directly on the segmented masks; no 3-D extrusion is introduced.
+
+\section{Results}
+
+\subsection{The three fields differ in topology as well as pore abundance}
+
+Figure~\ref{fig:fields} shows the three fields and their principal topological states. At $\ell=\SI{7.04}{\micro m}$, the 2-D pore-area fractions are 0.907, 0.731 and 0.465 for R1, R2 and R3, respectively (Table~\ref{tab:main}). The largest pore component contains 99.7\% of the pore pixels in R1, 85.6\% in R2 and 48.4\% in R3.
+
+The topological contrast is stronger than the phase-fraction trend alone. R1 has $\beta_0=17$ pore components but $\beta_1=255$ enclosed loops, corresponding to loop density \SI{78.5}{mm^{-2}} and $\chi=-238$. R2 has more pore components ($\beta_0=43$) but fewer loops ($\beta_1=135$), while R3 has $\beta_0=37$ and $\beta_1=79$. Thus, R1 is dominated by a highly redundant connected pore fabric, whereas R3 contains a much less loop-rich and more partitioned pore architecture.
+
+Most importantly, R1 and R2 span the image in both $x$ and $y$, whereas R3 spans only in $y$. The loss of horizontal connectivity occurs despite R3 retaining a substantial pore-area fraction of 0.465. This is the simplest demonstration of the descriptor's rationale: amount and organization are distinct observables.
+
+\begin{table}[t]
+\centering
+\caption{Principal JTPD quantities at an effective pixel size of \SI{7.04}{\micro m}. Betti and Euler densities are normalized by the \SI{3.24807}{mm^2} field area.}
+\label{tab:main}
+\begin{tabular}{lrrr}
+\toprule
+Quantity & R1 & R2 & R3\\
+\midrule
+2-D pore-area fraction, $\phi_p$ & 0.907 & 0.731 & 0.465\\
+Largest pore-component fraction & 0.997 & 0.856 & 0.484\\
+$\beta_0$ & 17 & 43 & 37\\
+$\beta_1$ & 255 & 135 & 79\\
+$\chi$ & -238 & -92 & -42\\
+$\beta_0/A$ [mm$^{-2}$] & 5.23 & 13.24 & 11.39\\
+$\beta_1/A$ [mm$^{-2}$] & 78.51 & 41.56 & 24.32\\
+X spanning & yes & yes & no\\
+Y spanning & yes & yes & yes\\
+Interface density [mm mm$^{-2}$] & 11.16 & 12.79 & 6.78\\
+Median $J_A(0.25)$ & 0.9852 & 0.9918 & 0.9808\\
+Median $J_L(0.25)$ & 1.0022 & 1.0058 & 1.0083\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figure1_workflow.pdf}
+\caption{JTPD workflow. A segmented two-phase rock section is converted into connected pore components; topology and directional spanning are evaluated directly on the binary mask; uniformly sampled component contours are interrogated by the Joukowsky map; and the results are assembled into an interpretable, scale-tagged vector. The contour in panel (c) is schematic and illustrates the nonlinear probe rather than a specific pore.}
+\label{fig:workflow}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figure2_fields_topology.pdf}
+\caption{Contrasting pore fabrics in the three rock-section fields. The upper row shows the binary fields with \SI{500}{\micro m} scale bars. Lower panels compare pore-area fraction, topological densities and directional spanning. R3 retains vertical but not horizontal spanning.}
+\label{fig:fields}
+\end{figure}
+
+\subsection{The Joukowsky term provides a controlled nonlinear shape response}
+
+For all fields, $J_A$ and $J_L$ converge exactly to unity at $\alpha=0$ and depart smoothly as the perturbation strength increases (Fig.~\ref{fig:jouk}). At $\alpha=0.25$, median $J_A$ is 0.9852, 0.9918 and 0.9808 for R1--R3, respectively, while median $J_L$ is 1.0022, 1.0058 and 1.0083. At $\alpha=0.35$, the median area response is 0.9588, 0.9748 and 0.9488, and the perimeter response is 1.0079, 1.0228 and 1.0275. The transform therefore generates distinct response curves even when the absolute perturbation at small $\alpha$ is modest.
+
+The synthetic similarity-transform test produced a maximum relative discrepancy of $8.9\times10^{-13}$ across translation, scale, rotation, reflection and traversal reversal. Thus, the measured response is numerically independent of the arbitrary coordinate frame to machine precision for the test polygon.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figure3_joukowsky_response.pdf}
+\caption{Joukowsky contour response. Curves show medians across qualifying pore components; shaded regions are interquartile ranges. The identity value at $\alpha=0$ provides an internal reference. Area and perimeter responses diverge progressively with perturbation strength, providing a nonlinear shape channel that is separate from pore amount and topology.}
+\label{fig:jouk}
+\end{figure}
+
+\subsection{Scale dependence separates robust state variables from resolved detail}
+
+The synthetic topology tests recovered all prescribed component, loop and spanning states exactly. On the rock images, pore-area fraction is comparatively stable over the tested scale range. From 14.08 to \SI{1.76}{\micro m} per pixel, the total variation is 0.0073 for R1, 0.0045 for R2 and 0.0014 for R3 (Fig.~\ref{fig:scale}). Directional spanning is unchanged across all four scales: R1 and R2 remain bidirectionally spanning, whereas R3 remains non-spanning in $x$ and spanning in $y$.
+
+Betti densities, by contrast, increase markedly as the pixel size decreases. For R1, loop density rises from 43.7 to \SI{220.7}{mm^{-2}} between 14.08 and \SI{1.76}{\micro m} per pixel. Similar increases occur in R2 and R3. Interface density also rises systematically at finer resolution as additional boundary roughness is resolved.
+
+These trends demonstrate why JTPD is explicitly written as $\mathbf D_{JT}(\ell,\alpha)$. Topological count densities are not claimed to be scale invariant. Their evolution with $\ell$ quantifies the hierarchy of features exposed by resolution, while directional spanning in this data set behaves as a more robust mesoscale state variable.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.90\linewidth]{figure4_scale_sensitivity.pdf}
+\caption{Resolution sensitivity for the three fields. Pore-area fraction and directional connectivity are comparatively stable, whereas component density, loop density and interface density increase as finer microstructural detail is resolved. The descriptor therefore carries the observation scale explicitly rather than hiding it.}
+\label{fig:scale}
+\end{figure}
+
+\section{Discussion}
+
+\subsection{Why topology and shape should not be collapsed into one statistic}
+
+The central design choice in JTPD is to preserve a separation between structurally different questions. Pore-area fraction asks how much pore phase occurs in a section. $\beta_0$ asks how fragmented that phase is. $\beta_1$ asks how many redundant loops are present. Spanning asks whether a connected path crosses a finite observation window in a specified direction. Interface density reflects boundary complexity at the resolved scale. The Joukowsky response asks how a closed contour reacts to a prescribed nonlinear analytic deformation. These measurements are related, but they are not interchangeable. The same logic underpins topological fracture-network characterization in structural geology, where connectivity cannot be reconstructed from fracture abundance alone \citep{SandersonNixon2015,SandersonNixon2018}.
+
+This decomposition is important in structural geology because a microstructure is rarely adequately represented by one scalar complexity measure. The same phase fraction can be partitioned into isolated pores, linked channels or loop-rich networks, and the same component count can occur with different directionality. Persistent-homology studies of rocks have made the broader point that connectivity contains information unavailable from conventional scalar morphology \citep{Robins2016,Bizhani2021,Liu2026}. JTPD does not attempt to replace persistent homology. Instead, it occupies a lower-dimensional niche: it retains the most direct planar topological quantities and combines them with explicitly geometric observables that can be read and audited without a persistence diagram.
+
+The three fields provide a useful illustration. R3 is not merely less pore-rich than R1; it has lost horizontal spanning while maintaining vertical connectivity. R1, meanwhile, has fewer connected pore components than R2 but almost twice its loop density. Those statements are closer to a structural description of fabric than a ranking by pore-area fraction.
+
+\subsection{What the Joukowsky term adds}
+
+The Joukowsky term should be interpreted conservatively. It is not a physical model of flow through a pore and it does not assign mechanical meaning to $\alpha$. Its role is mathematical: Eq.~\ref{eq:jouk} applies a nonlinear reciprocal perturbation to a normalized contour, and the area/perimeter response records how the boundary redistributes under that perturbation. This gives a reproducible shape susceptibility that is distinct from linear aspect ratio or covariance anisotropy.
+
+Two features make this useful as a descriptor rather than a decorative transform. First, the quantities are dimensionless ratios with an identity reference at $\alpha=0$. Second, orientation averaging removes dependence on the arbitrary image axes. Classical Joukowsky mapping is well established as a conformal-geometry construction \citep{Repp1974}; the contribution here is not the map itself, but its use as a controlled, invariant response operator on segmented geological contours.
+
+The response is intentionally mild at $\alpha=0.25$ and becomes more discriminative at larger $\alpha$. This is preferable to selecting a single aggressive transform that maximizes separation in three examples. In a larger data set, the response curve can be summarized by a slope, an integral over $\alpha$, or a small number of sampled values. The current formulation therefore exposes the tuning parameter instead of embedding it invisibly.
+
+\subsection{Scale is part of the geological measurement}
+
+The resolution experiment is arguably as important as the between-field comparison. A raw count of loops is meaningless without the scale at which holes become resolvable. The roughly fivefold increase in R1 loop density between the coarsest and finest representations is not a failure of topology; it records a population of smaller-scale closed structures progressively admitted by the image. This is consistent with the broader observation that digital-rock topology changes under image reduction \citep{Prokhorov2021}.
+
+At the same time, some features remain stable. Pore-area fraction changes by less than 0.8 percentage points in all three fields, and the directional spanning state is identical at all tested scales. This suggests a practical hierarchy for structural interpretation: use scale-stable features to describe mesoscale connectivity state, and use the rate of change of Betti/interface densities with $\ell$ to describe multiscale structural richness. Such a hierarchy may be especially useful for comparing domains in deformed rocks, fracture networks, cataclastic fabrics, pressure-solution seams, or vein-pore systems where directionality and scale are geologically meaningful.
+
+\subsection{Relation to existing image descriptors}
+
+Rock-section image analysis in structural geology has developed from automated boundary mapping and grain-size measurement \citep{Heilbronner2000} to workflows that identify minerals, grains, pores and morphological properties from multi-angle microscopy \citep{Zhang2020}. Digital-rock studies have added pore-network extraction, tortuosity and topology \citep{Blunt2013,Fu2021,Wang2022}. Other communities have used persistent topology to build pore-shape fingerprints \citep{Lee2017}. JTPD is complementary to these approaches.
+
+Relative to a list of conventional morphometrics, JTPD adds explicit Betti-based organization and a coordinate-invariant nonlinear contour response. Relative to persistent homology, it is much smaller and directly tied to a chosen observation scale. Relative to a learned image embedding, every coordinate has a declared geometric or topological meaning. That interpretability is the feature we consider most transferable: a future classifier or regression model can use JTPD, but the descriptor remains useful even before any target variable is available.
+
+\subsection{Limitations and validation required before predictive use}
+
+The present data set is intentionally small: three fields from one parent rock-section mosaic. It cannot establish lithology-wide statistics, distinguish tectonic domains, or validate prediction of permeability or mechanical properties. The segmentation itself is treated as fixed; uncertainty from thresholding or phase labelling should be propagated in a larger study \citep{Iassonov2009}. The analysis is strictly two-dimensional, so planar spanning must not be reported as three-dimensional pore connectivity.
+
+The contour transform is also a descriptor choice, not a uniquely privileged physics. Its utility should be tested against standard shape factors, Fourier descriptors, skeleton-based metrics, Minkowski functionals and persistent-homology summaries on larger and more diverse data. The most compelling geological validation would pair JTPD with independent information: thin-section orientation relative to structural fabric, mapped deformation domains, measured permeability, or mechanical state. Such experiments would determine which parts of Eq.~\ref{eq:descriptor} are diagnostic of process rather than merely descriptive of image morphology.
+
+\section{Conclusions}
+
+We present JTPD as a compact, scale-aware representation of two-dimensional pore fabrics in segmented rock sections. The method has four defining properties.
+
+First, it separates pore amount from organization: phase fraction, component density, loop density, Euler density and directional spanning are retained as different observables. Second, it introduces a contour-preserving Joukowsky response whose dimensionless area and perimeter ratios are referenced to the identity transform and made coordinate-invariant by orientation averaging. Third, the digital topology is validated on synthetic masks with known Betti numbers. Fourth, the descriptor explicitly carries observation scale; in the present fields, pore fraction and directional spanning are stable over an eightfold range in linear pixel size, whereas Betti and interface densities reveal progressively finer structure.
+
+The three rock-section fields are sufficient to demonstrate the measurement logic but not to claim predictive universality. The strongest use case for JTPD is therefore as an interpretable front end for structural-image comparison: it makes clear whether two fields differ because of phase abundance, fragmentation, loop redundancy, directionality, boundary geometry, or scale-dependent detail. That decomposition is the proposed methodological contribution.
+
+\section*{Data and code availability}
+The analysis script, figure-generation workflow, calibrated numerical outputs and manuscript source are stored with the project. The three segmented masks remain in the project data directory referenced by the script. A public repository and persistent archive should be assigned before submission.
+
+\section*{Declaration of competing interest}
+The authors declare that the competing-interest statement will be completed before submission.
+
+\section*{Acknowledgements}
+Acquisition metadata identify the RockFace project and LCCMat/Petrobras environment. Funding, sample provenance, contributor roles and permissions should be completed by the authors before submission.
+
+\bibliographystyle{elsarticle-harv}
+\bibliography{references}
+
+\end{document}
