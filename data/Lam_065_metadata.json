@@ -1,0 +1,27 @@
+{
+    "source_file": "Lam_065.czi",
+    "channel": 0,
+    "image_structure": {
+        "full_width_px": 59208,
+        "full_height_px": 49805,
+        "global_x_origin": -133975,
+        "global_y_origin": 5398,
+        "dimensions_order": ""
+    },
+    "physical_scaling": {
+        "pixel_size_x_meters": 4.3999999999999997e-07,
+        "pixel_size_y_meters": 4.3999999999999997e-07,
+        "unit": "meters"
+    },
+    "patch_generation": {
+        "patch_size_px": 4096,
+        "stride_px": 3800,
+        "overlap_px": 296,
+        "total_patches": 224
+    },
+    "analysis_info": {
+        "project": "RockFace",
+        "institution": "LCCMat / Petrobras",
+        "engine_version": "Alfa 1.0"
+    }
+}
